@@ -420,7 +420,34 @@ def main():
 							img_name = str(Path(im_path_bs[jj]).name)
 							basename = os.path.splitext(os.path.basename(img_name))[0]
 							outpath = str(Path(opt.outdir)) + '/' + basename + '.png'
-							Image.fromarray(im_sr[jj, ].astype(np.uint8)).save(outpath)
+
+							# Convertir la imagen generada a formato Pillow
+							pil_image = Image.fromarray(im_sr[jj].astype(np.uint8))
+
+							# Obtener dimensiones originales de la imagen inicial cargada
+							original_image = Image.open(im_path_bs[jj])
+							original_width, original_height = original_image.size
+
+							# Calcular las dimensiones deseadas basadas en el factor de escala
+							target_width = int(original_width * opt.upscale)
+							target_height = int(original_height * opt.upscale)
+
+							# Calcular las coordenadas para recortar desde la esquina superior izquierda
+							left = 0
+							top = 0
+							right = target_width
+							bottom = target_height
+
+							# Ajustar las coordenadas para no exceder los límites
+							right = min(right, pil_image.size[0])  # Limitar el ancho si es mayor que la imagen generada
+							bottom = min(bottom, pil_image.size[1])  # Limitar la altura si es mayor que la imagen generada
+
+							# Recortar la imagen
+							cropped_image = pil_image.crop((left, top, right, bottom))
+
+							# Guardar la imagen recortada
+							cropped_image.save(outpath)
+
 
 				toc = time.time()
 
