@@ -1,6 +1,7 @@
 """make variations of input image"""
 
 import argparse, os, sys, glob
+
 import PIL
 import torch
 import numpy as np
@@ -16,9 +17,13 @@ from contextlib import nullcontext
 import time
 from pytorch_lightning import seed_everything
 
+# Añade la carpeta raíz del proyecto al PYTHONPATH
+project_root = os.path.abspath(os.path.dirname(__file__) + "/../")
+sys.path.append(project_root)
+sys.path.append(r"D:/GIAA5/Natalia Rdgz/StableSR/venv/src/taming-transformers")
+
+
 from ldm.util import instantiate_from_config
-from ldm.models.diffusion.ddim import DDIMSampler
-from ldm.models.diffusion.plms import PLMSSampler
 import math
 import copy
 import torch.nn.functional as F
@@ -273,11 +278,16 @@ def main():
 	batch_size = opt.n_samples
 
 	images_path_ori = sorted(glob.glob(os.path.join(opt.init_img, "*")))
-	images_path = copy.deepcopy(images_path_ori)
+
+	# Filtrar solo archivos válidos
+	images_path = [p for p in images_path_ori if os.path.isfile(p)]
+
 	for item in images_path_ori:
 		img_name = item.split('/')[-1]
 		if os.path.exists(os.path.join(outpath, img_name)):
 			images_path.remove(item)
+
+
 	print(f"Found {len(images_path)} inputs.")
 
 	model.register_schedule(given_betas=None, beta_schedule="linear", timesteps=1000,
